@@ -27,6 +27,8 @@ Github action for deploying new version of a service to ECS.
 ```yml
 - name: Deploy to ECS
   uses: springworks/deploy-to-ecs@master
+  with:
+    deploy-file: './deploy_files/deploy.json'
   env:
     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
