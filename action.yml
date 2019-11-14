@@ -1,0 +1,10 @@
+name: 'Deploy to ECS'
+description: 'Github action for deploying new version of a service to ECS.'
+inputs:
+  deploy-file:
+    description: 'The deploy file to use.'
+    required: true
+    default: './deploy.json'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

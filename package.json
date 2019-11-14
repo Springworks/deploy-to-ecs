@@ -1,0 +1,22 @@
+{
+  "name": "deploy-to-ecs",
+  "version": "1.0.0",
+  "description": "Github action for deploying new version of a service to ECS.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Springworks/deploy-to-ecs.git"
+  },
+  "author": "Springworks International AB",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Springworks/deploy-to-ecs/issues"
+  },
+  "homepage": "https://github.com/Springworks/deploy-to-ecs#readme",
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "@actions/exec": "^1.0.1",
+    "aws-sdk": "^2.566.0",
+    "execa": "^3.3.0"
+  }
+}
