@@ -10,6 +10,10 @@ Github action for deploying new version of a service to ECS.
 
 ## Environment variables
 
+### `REPOSITORY_NAME`
+
+**Required**
+
 ### `AWS_ACCESS_KEY_ID`
 
 **Required**

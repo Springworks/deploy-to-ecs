@@ -56,7 +56,7 @@ async function notifyDeployment(deploy_file, version) {
       PREVIOUS_TAG = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
     }
 
-    await exec.exec(`npx --package deployment-notifier deployment-completed -N ${process.env.GITHUB_REPOSITORY} -P ${PREVIOUS_TAG} -T ${CURRENT_TAG} -E "${ENVIRONMENT}"`);
+    await exec.exec(`npx --package deployment-notifier deployment-completed -N ${process.env.REPOSITORY_NAME} -P ${PREVIOUS_TAG} -T ${CURRENT_TAG} -E "${ENVIRONMENT}"`);
   } catch (e) {
     throw new Error('notifyDeployment failed');
   }
@@ -64,6 +64,10 @@ async function notifyDeployment(deploy_file, version) {
 
 async function run() {
   try {
+    if(!process.env.REPOSITORY_NAME) {
+      throw new Error('Required environment variable REPOSITORY_NAME is not set.');
+    }
+
     const deploy_file = core.getInput('deploy-file');
     const version = readFileSecret('./VERSION/VERSION.txt');
 
