@@ -14,9 +14,8 @@ async function deployToEcs(deploy_file, version) {
     process.env.NEW_RELIC_EVENT_INSERT_KEY = readFileSecret('./SECRET_NEW_RELIC_EVENT_INSERT_KEY.txt');
     process.env.NEW_RELIC_LICENSE_KEY = readFileSecret('./SECRET_NEW_RELIC_LICENSE_KEY.txt');
 
-    const NPM_TOKEN = readFileSecret('./SECRET_NPM_TOKEN.txt');
-    process.env.NODE_AUTH_TOKEN = NPM_TOKEN;
-    writeFileSync('./.npmrc', `//registry.npmjs.org/:_authToken=${NPM_TOKEN}`);
+    process.env.NODE_AUTH_TOKEN = readFileSecret('./SECRET_NPM_TOKEN.txt');
+    // writeFileSync('./.npmrc', `//registry.npmjs.org/:_authToken=${NPM_TOKEN}`);
 
     await exec.exec('npm i @springworks/ecs-deployer@2.23.0');
     await exec.exec('npm view @springworks/ecs-deployer@2.23.0');
