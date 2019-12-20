@@ -15,9 +15,9 @@ async function deployToEcs(deploy_file, version) {
     process.env.NEW_RELIC_LICENSE_KEY = readFileSecret('./SECRET_NEW_RELIC_LICENSE_KEY.txt');
     process.env.NODE_AUTH_TOKEN = readFileSecret('./SECRET_NPM_TOKEN.txt');
 
-    await exec.exec('npm i @springworks/ecs-deployer@2.23.0');
-    await exec.exec('npm view @springworks/ecs-deployer@2.23.0');
-    await exec.exec(`npx --package @springworks/ecs-deployer@2.23.0 ecs-deployer ${version} ${deploy_file}`);
+    await exec.exec('npm i @springworks/ecs-deployer@2.26.0');
+    await exec.exec('npm view @springworks/ecs-deployer@2.26.0');
+    await exec.exec(`npx --package @springworks/ecs-deployer@2.26.0 ecs-deployer ${version} ${deploy_file}`);
   } catch (e) {
     throw new Error('deployToEcs failed');
   }
