@@ -56,7 +56,7 @@ async function notifyDeployment(deploy_file, version) {
 
     await exec.exec(`npx --package deployment-notifier deployment-completed -N ${process.env.REPOSITORY_NAME} -P ${PREVIOUS_TAG} -T ${CURRENT_TAG} -E "${ENVIRONMENT}"`);
   } catch (e) {
-    throw new Error('notifyDeployment failed');
+    console.error('notifyDeployment failed:', e);
   }
 }
 
