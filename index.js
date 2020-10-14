@@ -47,12 +47,11 @@ async function notifyDeployment(deploy_file, version) {
 
     const { stdout: all_tags } = await execa('git', ['tag', '-l', '--sort=-creatordate']);
     const only_tags_with_v = all_tags.split('\n').filter((tag) => tag.startsWith('v'));
-    let PREVIOUS_TAG = only_tags_with_v.length > 1 ? only_tags_with_v[1] : null;
+    const PREVIOUS_TAG = only_tags_with_v.length > 1 ? only_tags_with_v[1] : null;
 
     if (!PREVIOUS_TAG) {
       console.error('PREVIOUS_TAG not found.');
-      // Magic "empty repo" commit hash
-      PREVIOUS_TAG = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
+      return;
     }
 
     await exec.exec(`npx --package deployment-notifier deployment-completed -N ${process.env.REPOSITORY_NAME} -P ${PREVIOUS_TAG} -T ${CURRENT_TAG} -E "${ENVIRONMENT}"`);
