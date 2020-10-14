@@ -19,6 +19,7 @@ async function deployToEcs(deploy_file, version) {
     await exec.exec('npm view @springworks/ecs-deployer@2.26.0');
     await exec.exec(`npx --package @springworks/ecs-deployer@2.26.0 ecs-deployer ${version} ${deploy_file}`);
   } catch (e) {
+    core.error(e);
     throw new Error('deployToEcs failed');
   }
 }
@@ -29,6 +30,7 @@ async function waitUntilStable(deploy_file) {
     const CLUSTER_ARN = require(resolve(deploy_file)).service.cluster || 'default';
     await exec.exec(`aws ecs wait services-stable --cluster ${CLUSTER_ARN} --services ${SERVICE_NAME}`);
   } catch (e) {
+    core.error(e);
     throw new Error('waitUntilStable failed');
   }
 }
@@ -50,13 +52,13 @@ async function notifyDeployment(deploy_file, version) {
     const PREVIOUS_TAG = only_tags_with_v.length > 1 ? only_tags_with_v[1] : null;
 
     if (!PREVIOUS_TAG) {
-      console.error('PREVIOUS_TAG not found.');
+      core.error('PREVIOUS_TAG not found.');
       return;
     }
 
     await exec.exec(`npx --package deployment-notifier deployment-completed -N ${process.env.REPOSITORY_NAME} -P ${PREVIOUS_TAG} -T ${CURRENT_TAG} -E "${ENVIRONMENT}"`);
   } catch (e) {
-    console.error('notifyDeployment failed:', e);
+    core.error(`notifyDeployment failed: ${e}`);
   }
 }
 
@@ -75,7 +77,7 @@ async function run() {
     await waitUntilStable(deploy_file);
     await notifyDeployment(deploy_file, version);
   } catch (error) {
-    core.setFailed(error.message);
+    core.setFailed(error);
   }
 }
 
