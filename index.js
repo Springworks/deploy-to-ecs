@@ -48,6 +48,7 @@ async function notifyDeployment(deploy_file, version) {
     const ENVIRONMENT = deploy_file;
 
     const { stdout: all_tags } = await execa('git', ['tag', '-l', '--sort=-creatordate']);
+    core.info(`all_tags:\n${all_tags}`);
     const only_tags_with_v = all_tags.split('\n').filter((tag) => tag.startsWith('v'));
     const PREVIOUS_TAG = only_tags_with_v.length > 1 ? only_tags_with_v[1] : null;
 
