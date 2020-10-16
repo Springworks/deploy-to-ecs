@@ -8,6 +8,44 @@ function readFileSecret(secret_file) {
   return readFileSync(secret_file, 'utf8').trim();
 }
 
+function readVersionFile() {
+  try {
+    // This path is used by `actions/download-artifact@v2` unless a path is specified to match the behaviour of v1.
+    return readFileSecret('./VERSION.txt');
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      // err.code will be ENOENT if the file does not exist
+      throw err;
+    }
+  }
+  try {
+    // This path is used by `actions/download-artifact@v1`. It will create a dir with the name of the artifact (VERSION).
+    return readFileSecret('./VERSION/VERSION.txt');
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      throw err;
+    }
+  }
+  throw new Error(`Could not find the VERSION artifact.
+Make sure that actions/upload-artifact and actions/download-artifact are configured correctly.
+
+Example:
+
+    # in the tag-and-push-to-ecr step
+      - name: Upload version
+        uses: actions/upload-artifact@v2.2.0
+        with:
+          name: VERSION
+          path: VERSION.txt
+
+    # in the deploy-to-ecs step
+      - name: Download version
+        uses: actions/download-artifact@v2.0.5
+        with:
+          name: VERSION
+`);
+}
+
 async function deployToEcs(deploy_file, version) {
   try {
     process.env.SPLUNK_TOKEN = readFileSecret('./SECRET_SPLUNK_TOKEN.txt');
@@ -70,7 +108,7 @@ async function run() {
     }
 
     const deploy_file = core.getInput('deploy-file');
-    const version = readFileSecret('./VERSION/VERSION.txt');
+    const version = readVersionFile();
 
     process.env.AWS_DEFAULT_REGION = process.env.AWS_REGION;
 
