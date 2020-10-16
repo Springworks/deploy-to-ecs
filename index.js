@@ -48,12 +48,12 @@ async function notifyDeployment(deploy_file, version) {
     const ENVIRONMENT = deploy_file;
 
     const { stdout: all_tags } = await execa('git', ['tag', '-l', '--sort=-creatordate']);
-    core.info(`all_tags:\n${all_tags}`);
     const only_tags_with_v = all_tags.split('\n').filter((tag) => tag.startsWith('v'));
     const PREVIOUS_TAG = only_tags_with_v.length > 1 ? only_tags_with_v[1] : null;
 
     if (!PREVIOUS_TAG) {
-      core.error('PREVIOUS_TAG not found.');
+      const tags_json = JSON.stringify({ all_tags: all_tags.split('\n') }, null, 2);
+      core.error(`PREVIOUS_TAG not found. ${tags_json}`);
       return;
     }
 
