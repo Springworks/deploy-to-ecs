@@ -1,7 +1,0 @@
-{
-  "extends": "springworks/mocha",
-  "globals": {
-    "should": false,
-    "sinon": false
-  }
-}
