@@ -1,33 +1,31 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
-const fs = require('fs');
-const path = require('path');
+const { readFileSync, writeFileSync } = require('fs');
+const { resolve } = require('path');
 const execa = require('execa');
 
 function readFileSecret(secret_file) {
-  return fs.readFileSync(secret_file, 'utf8').trim();
+  return readFileSync(secret_file, 'utf8').trim();
 }
 
 function readVersionFile() {
   try {
     // This path is used by `actions/download-artifact@v2` unless a path is specified to match the behaviour of v1.
     return readFileSecret('./VERSION.txt');
-  } catch (error) {
-    if (error.code !== 'ENOENT') {
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
       // err.code will be ENOENT if the file does not exist
-      throw error;
+      throw err;
     }
   }
-
   try {
     // This path is used by `actions/download-artifact@v1`. It will create a dir with the name of the artifact (VERSION).
     return readFileSecret('./VERSION/VERSION.txt');
-  } catch (error) {
-    if (error.code !== 'ENOENT') {
-      throw error;
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      throw err;
     }
   }
-
   throw new Error(`Could not find the VERSION artifact.
 Make sure that actions/upload-artifact and actions/download-artifact are configured correctly.
 
@@ -55,20 +53,22 @@ async function deployToEcs(deploy_file, version) {
     process.env.NEW_RELIC_LICENSE_KEY = readFileSecret('./SECRET_NEW_RELIC_LICENSE_KEY.txt');
     process.env.NODE_AUTH_TOKEN = readFileSecret('./SECRET_NPM_TOKEN.txt');
 
-    await exec.exec(`node_modules/.bin/ecs-deployer ${version} ${deploy_file}`);
-  } catch (error) {
-    core.error(error);
+    await exec.exec('npm i @springworks/ecs-deployer@2.26.0');
+    await exec.exec('npm view @springworks/ecs-deployer@2.26.0');
+    await exec.exec(`npx --package @springworks/ecs-deployer@2.26.0 ecs-deployer ${version} ${deploy_file}`);
+  } catch (e) {
+    core.error(e);
     throw new Error('deployToEcs failed');
   }
 }
 
 async function waitUntilStable(deploy_file) {
   try {
-    const SERVICE_NAME = require(path.resolve(deploy_file)).service.serviceName;
-    const CLUSTER_ARN = require(path.resolve(deploy_file)).service.cluster || 'default';
+    const SERVICE_NAME = require(resolve(deploy_file)).service.serviceName;
+    const CLUSTER_ARN = require(resolve(deploy_file)).service.cluster || 'default';
     await exec.exec(`aws ecs wait services-stable --cluster ${CLUSTER_ARN} --services ${SERVICE_NAME}`);
-  } catch (error) {
-    core.error(error);
+  } catch (e) {
+    core.error(e);
     throw new Error('waitUntilStable failed');
   }
 }
@@ -95,15 +95,15 @@ async function notifyDeployment(deploy_file, version) {
       return;
     }
 
-    await exec.exec(`node_modules/.bin/deployment-completed -N ${process.env.REPOSITORY_NAME} -P ${PREVIOUS_TAG} -T ${CURRENT_TAG} -E "${ENVIRONMENT}"`);
-  } catch (error) {
-    core.error(`notifyDeployment failed: ${error}`);
+    await exec.exec(`npx --package deployment-notifier deployment-completed -N ${process.env.REPOSITORY_NAME} -P ${PREVIOUS_TAG} -T ${CURRENT_TAG} -E "${ENVIRONMENT}"`);
+  } catch (e) {
+    core.error(`notifyDeployment failed: ${e}`);
   }
 }
 
 async function run() {
   try {
-    if (!process.env.REPOSITORY_NAME) {
+    if(!process.env.REPOSITORY_NAME) {
       throw new Error('Required environment variable REPOSITORY_NAME is not set.');
     }
 
