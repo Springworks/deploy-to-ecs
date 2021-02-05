@@ -53,7 +53,7 @@ async function deployToEcs(deploy_file, version) {
     process.env.NEW_RELIC_LICENSE_KEY = readFileSecret('./SECRET_NEW_RELIC_LICENSE_KEY.txt');
     process.env.NODE_AUTH_TOKEN = readFileSecret('./SECRET_NPM_TOKEN.txt');
 
-    await exec('./ecs-deployer.js', [version, deploy_file], { cwd: `${__dirname}/node_modules/@springworks/ecs-deployer` });
+    await exec(`${__dirname}/node_modules/@springworks/ecs-deployer/ecs-deployer.js`, [version, deploy_file]);
   } catch (error) {
     core.error(error);
     throw new Error('deployToEcs failed');
@@ -93,7 +93,7 @@ async function notifyDeployment(deploy_file, version) {
       return;
     }
 
-    await exec('./deployment-completed.js', ['-N', process.env.REPOSITORY_NAME, '-P', PREVIOUS_TAG, '-T', CURRENT_TAG, '-E', ENVIRONMENT], { cwd: `${__dirname}/node_modules/deployment-notifier/bin` });
+    await exec(`${__dirname}/node_modules/deployment-notifier/bin/deployment-completed.js`, ['-N', process.env.REPOSITORY_NAME, '-P', PREVIOUS_TAG, '-T', CURRENT_TAG, '-E', ENVIRONMENT]);
   } catch (error) {
     core.error(`notifyDeployment failed: ${error}`);
   }
