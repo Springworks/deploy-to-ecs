@@ -2,10 +2,26 @@ const core = require('@actions/core');
 const { exec } = require('@actions/exec');
 const { readFileSync } = require('fs');
 const { resolve } = require('path');
-const execa = require('execa');
 
 function readFileSecret(secret_file) {
   return readFileSync(secret_file, 'utf8').trim();
+}
+
+async function execa(command, arguments) {
+  const out = {
+    stdout: '',
+    stderr: '',
+  };
+  const listeners = {
+    stdout: (buffer) => {
+      out.stdout += buffer.toString('utf-8');
+    },
+    stderr: (buffer) => {
+      out.stderr += buffer.toString('utf-8');
+    },
+  };
+  await exec(command, arguments, { listeners });
+  return out;
 }
 
 function readVersionFile() {
@@ -83,7 +99,8 @@ async function notifyDeployment(deploy_file, version) {
     const CURRENT_TAG = version;
     const ENVIRONMENT = deploy_file;
 
-    const { stdout: all_tags } = await execa('git', ['tag', '-l', '--sort=-creatordate']);
+    await execa('git', ['fetch', 'origin', '--tags']);
+    const { stdout: all_tags } = await execa('git', ['tag', '--list', 'v*', '--sort', '-creatordate']);
     const only_tags_with_v = all_tags.split('\n').filter((tag) => tag.startsWith('v'));
     const PREVIOUS_TAG = only_tags_with_v.length > 1 ? only_tags_with_v[1] : null;
 
